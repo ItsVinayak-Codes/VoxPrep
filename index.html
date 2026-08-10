@@ -1,0 +1,1743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VoxPrep AI - Interview Simulator</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Google Fonts: Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet" />
+
+  <!-- React & ReactDOM CDNs -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  
+  <!-- Babel Standalone CDN -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <style>
+    body {
+      font-family: "Plus Jakarta Sans", sans-serif;
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect, useRef, useCallback } = React;
+
+    // Standalone inline SVG icon components for zero external dependency errors
+    const IconBase = ({ className = "w-5 h-5", style = {}, children, viewBox = "0 0 24 24" }) => (
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox={viewBox}
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className={className}
+        style={style}
+      >
+        {children}
+      </svg>
+    );
+
+    const MicVocal = (props) => (
+      <IconBase {...props}>
+        <path d="m12 8-9.04 9.06a2.82 2.82 0 1 0 3.98 3.98L16 12" />
+        <circle cx="17" cy="7" r="5" />
+      </IconBase>
+    );
+
+    const Mic = (props) => (
+      <IconBase {...props}>
+        <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z" />
+        <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+        <line x1="12" x2="12" y1="19" y2="22" />
+      </IconBase>
+    );
+
+    const Volume2 = (props) => (
+      <IconBase {...props}>
+        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+        <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+        <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+      </IconBase>
+    );
+
+    const VolumeX = (props) => (
+      <IconBase {...props}>
+        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+        <line x1="22" x2="16" y1="9" y2="15" />
+        <line x1="16" x2="22" y1="9" y2="15" />
+      </IconBase>
+    );
+
+    const Keyboard = (props) => (
+      <IconBase {...props}>
+        <rect width="20" height="12" x="2" y="6" rx="2" />
+        <path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M8 14h8M6 14h.01M18 14h.01" />
+      </IconBase>
+    );
+
+    const Award = (props) => (
+      <IconBase {...props}>
+        <circle cx="12" cy="8" r="6" />
+        <path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11" />
+      </IconBase>
+    );
+
+    const BotMessageSquare = (props) => (
+      <IconBase {...props}>
+        <path d="M12 6V2H8" />
+        <rect width="16" height="12" x="4" y="6" rx="2" />
+        <path d="M2 14h2M20 14h2M15 11v2M9 11v2" />
+      </IconBase>
+    );
+
+    const Send = (props) => (
+      <IconBase {...props}>
+        <path d="m22 2-7 20-4-9-9-4Z" />
+        <path d="M22 2 11 13" />
+      </IconBase>
+    );
+
+    const Command = (props) => (
+      <IconBase {...props}>
+        <path d="M15 6v12a3 3 0 1 0 3-3H6a3 3 0 1 0 3 3V6a3 3 0 1 0-3 3h12a3 3 0 1 0-3-3" />
+      </IconBase>
+    );
+
+    const UserCheck = (props) => (
+      <IconBase {...props}>
+        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+        <circle cx="9" cy="7" r="4" />
+        <polyline points="16 11 18 13 22 9" />
+      </IconBase>
+    );
+
+    const ThumbsUp = (props) => (
+      <IconBase {...props}>
+        <path d="M7 10v12M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2h0a3.13 3.13 0 0 1 3 3.88Z" />
+      </IconBase>
+    );
+
+    const TrendingUp = (props) => (
+      <IconBase {...props}>
+        <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
+        <polyline points="16 7 22 7 22 13" />
+      </IconBase>
+    );
+
+    const FileText = (props) => (
+      <IconBase {...props}>
+        <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" />
+        <polyline points="14 2 14 8 20 8" />
+        <line x1="16" x2="8" y1="13" y2="13" />
+        <line x1="16" x2="8" y1="17" y2="17" />
+        <line x1="10" x2="8" y1="9" y2="9" />
+      </IconBase>
+    );
+
+    const Download = (props) => (
+      <IconBase {...props}>
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+        <polyline points="7 10 12 15 17 10" />
+        <line x1="12" x2="12" y1="15" y2="3" />
+      </IconBase>
+    );
+
+    const RotateCcw = (props) => (
+      <IconBase {...props}>
+        <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+        <path d="M3 3v5h5" />
+      </IconBase>
+    );
+
+    const Phone = (props) => (
+      <IconBase {...props}>
+        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+      </IconBase>
+    );
+
+    const Mail = (props) => (
+      <IconBase {...props}>
+        <rect width="20" height="16" x="2" y="4" rx="2" />
+        <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+      </IconBase>
+    );
+
+    const Clock = (props) => (
+      <IconBase {...props}>
+        <circle cx="12" cy="12" r="10" />
+        <polyline points="12 6 12 12 16 14" />
+      </IconBase>
+    );
+
+    const GraduationCap = (props) => (
+      <IconBase {...props}>
+        <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
+        <path d="M6 12v5c3 3 9 3 12 0v-5" />
+      </IconBase>
+    );
+
+    const Briefcase = (props) => (
+      <IconBase {...props}>
+        <rect width="20" height="14" x="2" y="7" rx="2" />
+        <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
+      </IconBase>
+    );
+
+    const Building2 = (props) => (
+      <IconBase {...props}>
+        <path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z" />
+        <path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2M10 6h4M10 10h4M10 14h4M10 18h4" />
+      </IconBase>
+    );
+
+    const UsersRound = (props) => (
+      <IconBase {...props}>
+        <path d="M18 21a8 8 0 0 0-12 0" />
+        <circle cx="12" cy="11" r="5" />
+        <path d="M20 8a5 5 0 0 0-4-2" />
+        <path d="M4 8a5 5 0 0 1 4-2" />
+      </IconBase>
+    );
+
+    const Sparkles = (props) => (
+      <IconBase {...props}>
+        <path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z" />
+      </IconBase>
+    );
+
+    const Cpu = (props) => (
+      <IconBase {...props}>
+        <rect width="12" height="12" x="6" y="6" rx="2" />
+        <path d="M9 1 9 6M15 1 15 6M9 18 9 23M15 18 15 23M1 9 6 9M1 15 6 15M18 9 23 9M18 15 23 15" />
+      </IconBase>
+    );
+
+    const ShieldCheck = (props) => (
+      <IconBase {...props}>
+        <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z" />
+        <path d="m9 12 2 2 4-4" />
+      </IconBase>
+    );
+
+    const Check = (props) => (
+      <IconBase {...props}>
+        <path d="M20 6 9 17l-5-5" />
+      </IconBase>
+    );
+
+    const ArrowDown = (props) => (
+      <IconBase {...props}>
+        <path d="M12 5v14M19 12l-7 7-7-7" />
+      </IconBase>
+    );
+
+    const MousePointerClick = (props) => (
+      <IconBase {...props}>
+        <path d="m14 4.1 1 2.4 2.4 1-2.4 1-1 2.4-1-2.4-2.4-1 2.4-1zM4 4l7.07 17 2.51-7.39L21 11.07z" />
+      </IconBase>
+    );
+
+    const Moon = (props) => (
+      <IconBase {...props}>
+        <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
+      </IconBase>
+    );
+
+    const Sun = (props) => (
+      <IconBase {...props}>
+        <circle cx="12" cy="12" r="4" />
+        <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
+      </IconBase>
+    );
+
+    const Play = (props) => (
+      <IconBase {...props}>
+        <polygon points="6 3 20 12 6 21 6 3" />
+      </IconBase>
+    );
+
+    const LogOut = (props) => (
+      <IconBase {...props}>
+        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+        <polyline points="16 17 21 12 16 7" />
+        <line x1="21" x2="9" y1="12" y2="12" />
+      </IconBase>
+    );
+
+    const Bot = (props) => (
+      <IconBase {...props}>
+        <path d="M12 8V4H8" />
+        <rect width="16" height="12" x="4" y="8" rx="2" />
+        <path d="M2 14h2M20 14h2M15 13v2M9 13v2" />
+      </IconBase>
+    );
+
+    const PlayCircle = (props) => (
+      <IconBase {...props}>
+        <circle cx="12" cy="12" r="10" />
+        <polygon points="10 8 16 12 10 16 10 8" />
+      </IconBase>
+    );
+
+    const Loader2 = (props) => (
+      <IconBase {...props}>
+        <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+      </IconBase>
+    );
+
+    const API_BASE_URL = "http://localhost:8000";
+
+    function App() {
+      // Theme State ('dark' | 'light')
+      const [theme, setTheme] = useState('dark');
+
+      // Navigation & View State ('welcome' | 'interview')
+      const [page, setPage] = useState('welcome');
+      const [showRegistrationModal, setShowRegistrationModal] = useState(false);
+      const [showReportModal, setShowReportModal] = useState(false);
+
+      // Candidate Profile State
+      const [candidate, setCandidate] = useState({
+        name: '',
+        role: '',
+        company: '',
+        exp: 'Mid-Level',
+        type: 'Mixed Assessment'
+      });
+
+      // API Key States
+      const [mistralApiKey, setMistralApiKey] = useState('');
+      const [rimeApiKey, setRimeApiKey] = useState('');
+
+      // Chat & Session State
+      const [chatMessages, setChatMessages] = useState([]);
+      const [chatHistory, setChatHistory] = useState([]);
+      const [evaluations, setEvaluations] = useState([]);
+      const [sessionState, setSessionState] = useState('WELCOME_CONFIRMATION');
+      const [questionCount, setQuestionCount] = useState(0);
+      const [targetTotalQuestions, setTargetTotalQuestions] = useState(8);
+      const [inputValue, setInputValue] = useState('');
+
+      // Voice & Accessibility Controls
+      const [isVoiceOutputEnabled, setIsVoiceOutputEnabled] = useState(true);
+      const [isListening, setIsListening] = useState(false);
+      const [showVirtualKeyboard, setShowVirtualKeyboard] = useState(false);
+      const [voiceError, setVoiceError] = useState('');
+
+      // Synchronous State References & Audio
+      const isVoiceOutputEnabledRef = useRef(isVoiceOutputEnabled);
+      const chatMessagesEndRef = useRef(null);
+      const textareaRef = useRef(null);
+      const audioContextRef = useRef(null);
+      const currentAudioSourceRef = useRef(null);
+      const recognitionRef = useRef(null);
+      const hasTriggeredScrollPopupRef = useRef(false);
+      const lastScrollYRef = useRef(0);
+
+      // Hoisted Audio Helper Definitions
+      const ensureAudioContextUnlocked = useCallback(() => {
+        if (!audioContextRef.current) {
+          const AudioCtx = window.AudioContext || window.webkitAudioContext;
+          if (AudioCtx) {
+            audioContextRef.current = new AudioCtx();
+          }
+        }
+        if (audioContextRef.current && audioContextRef.current.state === 'suspended') {
+          audioContextRef.current.resume().catch(() => {});
+        }
+      }, []);
+
+      const stopVoiceOutput = useCallback(() => {
+        if (currentAudioSourceRef.current) {
+          try {
+            if (typeof currentAudioSourceRef.current.stop === 'function') {
+              currentAudioSourceRef.current.stop();
+            } else if (typeof currentAudioSourceRef.current.pause === 'function') {
+              currentAudioSourceRef.current.pause();
+              currentAudioSourceRef.current.currentTime = 0;
+            }
+          } catch (e) {}
+          currentAudioSourceRef.current = null;
+        }
+        if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+          try {
+            window.speechSynthesis.cancel();
+          } catch (e) {}
+        }
+      }, []);
+
+      const toggleVoiceOutput = useCallback(() => {
+        ensureAudioContextUnlocked();
+        setIsVoiceOutputEnabled(prev => {
+          const nextState = !prev;
+          if (!nextState) {
+            stopVoiceOutput();
+          }
+          return nextState;
+        });
+      }, [ensureAudioContextUnlocked, stopVoiceOutput]);
+
+      useEffect(() => {
+        isVoiceOutputEnabledRef.current = isVoiceOutputEnabled;
+      }, [isVoiceOutputEnabled]);
+
+      useEffect(() => {
+        const handleScroll = () => {
+          const currentScrollY = window.scrollY;
+          if (
+            currentScrollY > 350 &&
+            currentScrollY < lastScrollYRef.current &&
+            !hasTriggeredScrollPopupRef.current &&
+            !candidate.name &&
+            page === 'welcome'
+          ) {
+            setShowRegistrationModal(true);
+            hasTriggeredScrollPopupRef.current = true;
+          }
+          lastScrollYRef.current = currentScrollY;
+        };
+
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+      }, [candidate.name, page]);
+
+      useEffect(() => {
+        chatMessagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+      }, [chatMessages]);
+
+      const speakText = useCallback(async (text) => {
+        if (!isVoiceOutputEnabledRef.current || !text) return;
+
+        ensureAudioContextUnlocked();
+
+        // 1. Rime AI Text-to-Speech API Direct Integration
+        if (rimeApiKey) {
+          try {
+            const response = await fetch("https://users.rime.ai/v1/rime-tts", {
+              method: "POST",
+              headers: {
+                "Authorization": `Bearer ${rimeApiKey.trim()}`,
+                "Content-Type": "application/json",
+                "Accept": "audio/mpeg"
+              },
+              body: JSON.stringify({
+                speaker: "astra",
+                text: text,
+                modelId: "mistv2",
+                lang: "en"
+              })
+            });
+
+            if (response.ok) {
+              const audioBlob = await response.blob();
+              const audioUrl = URL.createObjectURL(audioBlob);
+              stopVoiceOutput();
+              const audio = new Audio(audioUrl);
+              currentAudioSourceRef.current = audio;
+              audio.play();
+              return;
+            }
+          } catch (e) {
+            console.warn("Rime AI TTS error, falling back to WebSpeech:", e);
+          }
+        }
+
+        // 2. WebSpeech API Speech Synthesis Fallback
+        if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+          try {
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.rate = 1.0;
+            utterance.pitch = 1.0;
+
+            const voices = window.speechSynthesis.getVoices();
+            if (voices && voices.length > 0) {
+              const prefVoice = voices.find(v => v.lang && v.lang.startsWith('en') && (v.name.includes('Natural') || v.name.includes('Google') || v.name.includes('Samantha') || v.name.includes('Daniel'))) || voices.find(v => v.lang && v.lang.startsWith('en'));
+              if (prefVoice) utterance.voice = prefVoice;
+            }
+
+            window.speechSynthesis.speak(utterance);
+          } catch (e) {
+            console.error("WebSpeech error:", e);
+          }
+        }
+      }, [rimeApiKey, ensureAudioContextUnlocked, stopVoiceOutput]);
+
+      const handleVkPress = (char) => {
+        const input = textareaRef.current;
+        if (!input) return;
+
+        input.focus();
+        const start = input.selectionStart !== null ? input.selectionStart : input.value.length;
+        const end = input.selectionEnd !== null ? input.selectionEnd : input.value.length;
+
+        if (char === 'Backspace') {
+          if (start === end && start > 0) {
+            const newValue = inputValue.substring(0, start - 1) + inputValue.substring(end);
+            setInputValue(newValue);
+            setTimeout(() => input.setSelectionRange(start - 1, start - 1), 0);
+          } else {
+            const newValue = inputValue.substring(0, start) + inputValue.substring(end);
+            setInputValue(newValue);
+            setTimeout(() => input.setSelectionRange(start, start), 0);
+          }
+        } else {
+          const newValue = inputValue.substring(0, start) + char + inputValue.substring(end);
+          setInputValue(newValue);
+          setTimeout(() => input.setSelectionRange(start + char.length, start + char.length), 0);
+        }
+      };
+
+      const toggleVoiceInput = async () => {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SpeechRecognition) {
+          setVoiceError("Speech recognition is not supported on this browser. Please type your response.");
+          return;
+        }
+
+        if (isListening) {
+          if (recognitionRef.current) {
+            try { recognitionRef.current.stop(); } catch (e) {}
+          }
+          setIsListening(false);
+          return;
+        }
+
+        try {
+          setVoiceError('');
+          if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+            await navigator.mediaDevices.getUserMedia({ audio: true });
+          }
+
+          const recognition = new SpeechRecognition();
+          recognition.continuous = true;
+          recognition.interimResults = true;
+          recognition.lang = 'en-US';
+
+          recognition.onstart = () => setIsListening(true);
+          recognition.onresult = (event) => {
+            let transcript = '';
+            for (let i = event.resultIndex; i < event.results.length; i++) {
+              transcript += event.results[i][0].transcript;
+            }
+            if (transcript) setInputValue(transcript);
+          };
+          recognition.onerror = (e) => {
+            console.warn("Speech recognition error:", e.error);
+            setIsListening(false);
+            if (e.error === 'not-allowed') {
+              setVoiceError("Microphone access denied. Please allow microphone permissions in browser settings.");
+            } else if (e.error !== 'no-speech') {
+              setVoiceError(`Voice dictation error: ${e.error}`);
+            }
+          };
+          recognition.onend = () => setIsListening(false);
+
+          recognitionRef.current = recognition;
+          recognition.start();
+        } catch (err) {
+          console.error("Microphone permission or start error:", err);
+          setIsListening(false);
+          setVoiceError("Unable to access microphone. Please check your microphone permissions.");
+        }
+      };
+
+      const handleStartInterviewSubmit = (e) => {
+        e.preventDefault();
+        ensureAudioContextUnlocked();
+        setShowRegistrationModal(false);
+        setPage('interview');
+
+        // Reset Chat State
+        setChatMessages([]);
+        setChatHistory([]);
+        setEvaluations([]);
+        setQuestionCount(0);
+        setTargetTotalQuestions(8);
+        setSessionState('WELCOME_CONFIRMATION');
+
+        // Deliver Initial Welcome Message
+        const welcomeText = `Hello ${candidate.name}! Welcome to your VoxPrep AI interview session for the ${candidate.role} position at ${candidate.company || 'Target Company'}. Are you ready to begin? Please confirm whenever you are set to start.`;
+        
+        const initialMsg = {
+          id: 'msg_' + Date.now(),
+          sender: 'interviewer',
+          text: welcomeText,
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        };
+
+        setChatMessages([initialMsg]);
+        setChatHistory([{ role: 'model', parts: [{ text: welcomeText }] }]);
+
+        if (isVoiceOutputEnabled) {
+          speakText(welcomeText);
+        }
+      };
+
+      const startNextQuestion = async (currentHistory, currentQCount, currentEvals) => {
+        const nextQCount = currentQCount + 1;
+        setQuestionCount(nextQCount);
+
+        let newTarget = 8;
+        if (currentEvals.length >= 3) {
+          let total = 0;
+          currentEvals.forEach(e => {
+            total += ((Number(e.techScore) || 7) + (Number(e.clarityScore) || 7) + (Number(e.relScore) || 7)) / 3;
+          });
+          const avg = total / currentEvals.length;
+          if (avg >= 8.0) newTarget = 10;
+          else if (avg >= 6.5) newTarget = 9;
+          else newTarget = 8;
+        }
+        setTargetTotalQuestions(newTarget);
+
+        if (nextQCount > newTarget) {
+          setShowReportModal(true);
+          return;
+        }
+
+        const loadingId = 'loading_' + Date.now();
+        setChatMessages(prev => [
+          ...prev,
+          {
+            id: loadingId,
+            sender: 'interviewer',
+            text: 'VoxPrep AI is formulating your next question with Mistral AI...',
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            isLoading: true
+          }
+        ]);
+
+        const systemPrompt = `You are VoxPrep, an expert hiring manager conducting a concise interview.
+Candidate Name: ${candidate.name}
+Target Role: ${candidate.role}
+Company: ${candidate.company || 'Target Company'}
+Experience Level: ${candidate.exp}
+Interview Focus: ${candidate.type}
+Question Progress: Question ${nextQCount} of ${newTarget}.
+
+CRITICAL INSTRUCTIONS:
+1. Ask ONE small, direct, and concise question (1 to 2 sentences MAXIMUM).
+2. Keep it crisp, conversational, and focused on practical scenarios or technical concepts.
+3. Do NOT ask multi-part questions or write long paragraphs.
+4. Avoid markdown bullet lists inside the question text.`;
+
+        const userPrompt = nextQCount === 1
+          ? `The candidate ${candidate.name} confirmed they are ready. Ask Question 1 now.`
+          : `Candidate just answered question ${nextQCount - 1}. Ask Question ${nextQCount} now.`;
+
+        try {
+          // 1. Mistral AI Chat Completions API
+          if (mistralApiKey) {
+            const messages = [
+              { role: 'system', content: systemPrompt },
+              ...currentHistory.map(h => ({
+                role: h.role === 'model' ? 'assistant' : 'user',
+                content: h.parts?.[0]?.text || ''
+              })),
+              { role: 'user', content: userPrompt }
+            ];
+
+            const response = await fetch('https://api.mistral.ai/v1/chat/completions', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${mistralApiKey.trim()}`
+              },
+              body: JSON.stringify({
+                model: 'mistral-small-latest',
+                messages: messages,
+                temperature: 0.7
+              })
+            });
+
+            if (response.ok) {
+              const result = await response.json();
+              const aiText = result.choices?.[0]?.message?.content || `Question ${nextQCount}: Could you explain a key technical challenge you recently solved?`;
+
+              setChatMessages(prev =>
+                prev.filter(m => m.id !== loadingId).concat({
+                  id: 'msg_' + Date.now(),
+                  sender: 'interviewer',
+                  text: aiText,
+                  time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                })
+              );
+
+              const updatedHistory = [
+                ...currentHistory,
+                { role: 'user', parts: [{ text: userPrompt }] },
+                { role: 'model', parts: [{ text: aiText }] }
+              ];
+              setChatHistory(updatedHistory);
+
+              if (isVoiceOutputEnabled) speakText(aiText);
+              return;
+            }
+          }
+
+          // 2. Fallback Gemini AI API
+          const apiKey = "";
+          const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+
+          let response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: currentHistory.concat([{ role: 'user', parts: [{ text: userPrompt }] }]),
+              systemInstruction: { parts: [{ text: systemPrompt }] }
+            })
+          });
+
+          if (!response.ok) {
+            response = await fetch(`${API_BASE_URL}/api/chat/question`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                contents: currentHistory.concat([{ role: 'user', parts: [{ text: userPrompt }] }]),
+                systemInstruction: { parts: [{ text: systemPrompt }] }
+              })
+            });
+          }
+
+          const result = await response.json();
+          const aiText = result.candidates?.[0]?.content?.parts?.[0]?.text || `Question ${nextQCount}: Could you briefly explain a key technical challenge you recently solved?`;
+
+          setChatMessages(prev =>
+            prev.filter(m => m.id !== loadingId).concat({
+              id: 'msg_' + Date.now(),
+              sender: 'interviewer',
+              text: aiText,
+              time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            })
+          );
+
+          const updatedHistory = [
+            ...currentHistory,
+            { role: 'user', parts: [{ text: userPrompt }] },
+            { role: 'model', parts: [{ text: aiText }] }
+          ];
+          setChatHistory(updatedHistory);
+
+          if (isVoiceOutputEnabled) {
+            speakText(aiText);
+          }
+        } catch (err) {
+          console.error("AI API Error:", err);
+          const fallbackText = `Question ${nextQCount}: Can you share one key project experience relevant to ${candidate.role}?`;
+          setChatMessages(prev =>
+            prev.filter(m => m.id !== loadingId).concat({
+              id: 'msg_' + Date.now(),
+              sender: 'interviewer',
+              text: fallbackText,
+              time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            })
+          );
+          if (isVoiceOutputEnabled) speakText(fallbackText);
+        }
+      };
+
+      const evaluateAnswerWithAI = async (answerText, currentMsgText) => {
+        const evalPrompt = `Evaluate this interview answer provided by ${candidate.name} for the role ${candidate.role}.
+Question: ${currentMsgText || ''}
+Answer: ${answerText}
+
+Return ONLY a valid JSON object with exact keys:
+"techScore" (number 1-10),
+"clarityScore" (number 1-10),
+"relScore" (number 1-10),
+"feedback" (short string max 20 words),
+"strength" (short string),
+"improvement" (short string)`;
+
+        // 1. Mistral AI Evaluation
+        if (mistralApiKey) {
+          try {
+            const response = await fetch('https://api.mistral.ai/v1/chat/completions', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${mistralApiKey.trim()}`
+              },
+              body: JSON.stringify({
+                model: 'mistral-small-latest',
+                response_format: { type: "json_object" },
+                messages: [
+                  { role: 'user', content: evalPrompt }
+                ]
+              })
+            });
+
+            if (response.ok) {
+              const data = await response.json();
+              const jsonText = data.choices?.[0]?.message?.content;
+              if (jsonText) {
+                const parsed = JSON.parse(jsonText);
+                setEvaluations(prev => [...prev, parsed]);
+                return parsed;
+              }
+            }
+          } catch (e) {
+            console.warn("Mistral AI evaluation error, falling back:", e);
+          }
+        }
+
+        // 2. Gemini AI Fallback Evaluation
+        try {
+          const apiKey = "";
+          const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+
+          let response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [{ parts: [{ text: evalPrompt }] }],
+              generationConfig: {
+                responseMimeType: "application/json"
+              }
+            })
+          });
+
+          if (!response.ok) {
+            response = await fetch(`${API_BASE_URL}/api/chat/evaluate`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                contents: [{ parts: [{ text: evalPrompt }] }]
+              })
+            });
+          }
+
+          const data = await response.json();
+          const jsonText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+          if (jsonText) {
+            const parsed = JSON.parse(jsonText);
+            setEvaluations(prev => [...prev, parsed]);
+            return parsed;
+          }
+        } catch (err) {
+          console.error("Evaluation error:", err);
+        }
+        return null;
+      };
+
+      const handleSendAnswer = (e) => {
+        if (e) e.preventDefault();
+        ensureAudioContextUnlocked();
+        const text = inputValue.trim();
+        if (!text) return;
+
+        setInputValue('');
+        setVoiceError('');
+        if (isListening && recognitionRef.current) {
+          try { recognitionRef.current.stop(); } catch(e) {}
+          setIsListening(false);
+        }
+
+        const userMsg = {
+          id: 'msg_' + Date.now(),
+          sender: 'candidate',
+          text: text,
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        };
+
+        setChatMessages(prev => [...prev, userMsg]);
+        const updatedHistory = [...chatHistory, { role: 'user', parts: [{ text: `Candidate Answer: ${text}` }] }];
+        setChatHistory(updatedHistory);
+
+        if (sessionState === 'WELCOME_CONFIRMATION') {
+          setSessionState('IN_PROGRESS');
+          const confirmationAck = "Awesome! Let's get started with your interview.";
+          setChatMessages(prev => [
+            ...prev,
+            {
+              id: 'msg_ack_' + Date.now(),
+              sender: 'interviewer',
+              text: confirmationAck,
+              time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            }
+          ]);
+          if (isVoiceOutputEnabled) speakText(confirmationAck);
+
+          setTimeout(() => {
+            startNextQuestion(updatedHistory, 0, evaluations);
+          }, 1000);
+          return;
+        }
+
+        const lastQuestionText = chatMessages.filter(m => m.sender === 'interviewer').slice(-1)[0]?.text;
+        evaluateAnswerWithAI(text, lastQuestionText);
+
+        setTimeout(() => {
+          startNextQuestion(updatedHistory, questionCount, evaluations);
+        }, 1200);
+      };
+
+      const handleLogout = () => {
+        if (isListening && recognitionRef.current) recognitionRef.current.stop();
+        stopVoiceOutput();
+
+        setCandidate({ name: '', role: '', company: '', exp: 'Mid-Level', type: 'Mixed Assessment' });
+        setPage('welcome');
+        setShowReportModal(false);
+        hasTriggeredScrollPopupRef.current = false;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      };
+
+      const computeReportMetrics = () => {
+        let avgTech = "8.5", avgClarity = "9.0", avgRel = "8.0";
+        let strengths = [];
+        let improvements = [];
+
+        if (evaluations.length > 0) {
+          let totalTech = 0, totalClarity = 0, totalRel = 0;
+          evaluations.forEach(item => {
+            totalTech += (Number(item.techScore) || 8);
+            totalClarity += (Number(item.clarityScore) || 8);
+            totalRel += (Number(item.relScore) || 8);
+            if (item.strength) strengths.push(item.strength);
+            if (item.improvement) improvements.push(item.improvement);
+          });
+          avgTech = (totalTech / evaluations.length).toFixed(1);
+          avgClarity = (totalClarity / evaluations.length).toFixed(1);
+          avgRel = (totalRel / evaluations.length).toFixed(1);
+        }
+
+        return { avgTech, avgClarity, avgRel, strengths, improvements };
+      };
+
+      const downloadTranscript = () => {
+        let content = `VOXPREP AI INTERVIEW SESSION TRANSCRIPT\n`;
+        content += `Candidate: ${candidate.name}\nRole: ${candidate.role}\nCompany: ${candidate.company || 'N/A'}\nDate: ${new Date().toLocaleDateString()}\n`;
+        content += `==============================================\n\n`;
+
+        chatMessages.forEach(msg => {
+          content += `${msg.sender === 'candidate' ? candidate.name : 'VoxPrep AI'}: ${msg.text}\n\n`;
+        });
+
+        const blob = new Blob([content], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `VoxPrep_Transcript_${candidate.name.replace(/\s+/g, '_')}.txt`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      };
+
+      const reportData = computeReportMetrics();
+
+      const isDark = theme === 'dark';
+      const themeVars = isDark
+        ? {
+            '--bg-color': '#1F150C',
+            '--card-color': '#412D15',
+            '--accent-color': '#E1DCC9',
+            '--text-color': '#E1DCC9',
+            '--border-color': 'rgba(225, 220, 201, 0.2)',
+            '--input-bg': 'rgba(31, 21, 12, 0.6)',
+          }
+        : {
+            '--bg-color': '#FBEFEF',
+            '--card-color': '#FFE2E2',
+            '--accent-color': '#8C6A9E',
+            '--text-color': '#2D1E2F',
+            '--border-color': '#C5B3D3',
+            '--input-bg': '#FFFFFF',
+          };
+
+      return (
+        <div
+          style={{
+            ...themeVars,
+            backgroundColor: 'var(--bg-color)',
+            color: 'var(--text-color)',
+            minHeight: '100vh',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between',
+            fontFamily: '"Plus Jakarta Sans", sans-serif'
+          }}
+          className="transition-colors duration-300 antialiased"
+        >
+          {/* Header Navigation */}
+          <header
+            className="sticky top-0 z-40 backdrop-blur-md bg-opacity-80 border-b border-opacity-20 border-current"
+            style={{ backgroundColor: 'var(--bg-color)' }}
+          >
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+              <div
+                className="flex items-center gap-3 cursor-pointer"
+                onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+              >
+                <div className="p-2 rounded-xl border border-opacity-20 border-current shadow-sm" style={{ backgroundColor: 'var(--card-color)' }}>
+                  <MicVocal className="w-6 h-6" style={{ color: 'var(--accent-color)' }} />
+                </div>
+                <span className="text-2xl font-extrabold tracking-tight">
+                  Vox<span style={{ color: 'var(--accent-color)' }}>Prep</span>
+                </span>
+                <span className="text-xs px-2 py-0.5 rounded-full border border-current opacity-70 font-mono hidden sm:inline-block">
+                  AI 3.1
+                </span>
+              </div>
+
+              {/* Header Controls */}
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-1 p-1 rounded-xl border border-opacity-20 border-current" style={{ backgroundColor: 'var(--card-color)' }}>
+                  <button
+                    onClick={() => setTheme('dark')}
+                    className={`px-2.5 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1.5 shadow-sm ${
+                      isDark ? 'opacity-100' : 'opacity-60 hover:opacity-100'
+                    }`}
+                    style={
+                      isDark
+                        ? { backgroundColor: 'var(--accent-color)', color: 'var(--bg-color)' }
+                        : { color: 'var(--text-color)' }
+                    }
+                  >
+                    <Moon className="w-3.5 h-3.5" />
+                    <span>Dark</span>
+                  </button>
+                  <button
+                    onClick={() => setTheme('light')}
+                    className={`px-2.5 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ${
+                      !isDark ? 'opacity-100' : 'opacity-60 hover:opacity-100'
+                    }`}
+                    style={
+                      !isDark
+                        ? { backgroundColor: 'var(--accent-color)', color: 'var(--bg-color)' }
+                        : { color: 'var(--text-color)' }
+                    }
+                  >
+                    <Sun className="w-3.5 h-3.5" />
+                    <span>Light</span>
+                  </button>
+                </div>
+
+                {page === 'welcome' ? (
+                  <button
+                    onClick={() => setShowRegistrationModal(true)}
+                    className="px-4 py-2 rounded-xl text-sm font-bold shadow-md transition flex items-center gap-2 hover:opacity-90"
+                    style={{ backgroundColor: 'var(--accent-color)', color: 'var(--bg-color)' }}
+                  >
+                    <Play className="w-4 h-4" />
+                    <span>Start Practice</span>
+                  </button>
+                ) : (
+                  <button
+                    onClick={handleLogout}
+                    className="px-4 py-2 rounded-xl text-sm font-medium border border-rose-500/50 text-rose-400 hover:bg-rose-500/10 transition flex items-center gap-2"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    <span>End Session</span>
+                  </button>
+                )}
+              </div>
+            </div>
+          </header>
+
+          {}
+          <main className="flex-grow">
+            {page === 'welcome' && (
+              <div className="transition-all duration-500">
+                <section className="relative py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto text-center">
+                  <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-current opacity-80 text-xs font-semibold mb-6 tracking-wide uppercase">
+                    <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                    Next-Gen AI Interview Prep Platform
+                  </div>
+
+                  <h1 className="text-4xl sm:text-6xl font-black tracking-tight leading-tight max-w-4xl mx-auto mb-6">
+                    Master Technical & Behavioral Interviews with{' '}
+                    <span className="underline decoration-wavy decoration-1" style={{ color: 'var(--accent-color)' }}>
+                      Real-time AI Voice
+                    </span>
+                  </h1>
+
+                  <p className="text-lg sm:text-xl opacity-80 max-w-2xl mx-auto mb-10 font-normal">
+                    VoxPrep simulates high-stakes job interviews in text and voice. Get instant score rubrics, acoustic delivery analysis, and tailored follow-up questions for any role.
+                  </p>
+
+                  <div className="flex flex-col sm:flex-row justify-center gap-4 items-center">
+                    <button
+                      onClick={() => setShowRegistrationModal(true)}
+                      className="px-8 py-4 rounded-2xl font-bold text-lg shadow-xl hover:scale-105 transition duration-200 flex items-center gap-3 w-full sm:w-auto justify-center"
+                      style={{ backgroundColor: 'var(--accent-color)', color: 'var(--bg-color)' }}
+                    >
+                      <Bot className="w-6 h-6" />
+                      <span>Begin Free AI Session</span>
+                    </button>
+                    <a
+                      href="#feasibilitySection"
+                      className="px-6 py-4 rounded-2xl font-semibold border border-opacity-20 border-current hover:opacity-80 transition w-full sm:w-auto flex items-center justify-center gap-2"
+                      style={{ backgroundColor: 'var(--card-color)' }}
+                    >
+                      <ArrowDown className="w-4 h-4" />
+                      <span>Explore Feasibility & Benefits</span>
+                    </a>
+                  </div>
+
+                  <div className="mt-12 inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-current text-xs opacity-75">
+                    <MousePointerClick className="w-4 h-4 animate-bounce" />
+                    <span>Scroll down to read viability breakdown — scrolling back up triggers interview setup!</span>
+                  </div>
+                </section>
+
+                <section id="feasibilitySection" className="py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-opacity-10 border-current">
+                  <div className="text-center mb-12">
+                    <h2 className="text-3xl font-extrabold tracking-tight mb-3">Feasibility & Market Viability</h2>
+                    <p className="text-sm opacity-75 max-w-xl mx-auto">Why AI-driven mock interviews are transforming talent assessment and job candidate readiness worldwide.</p>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div className="p-6 rounded-2xl border border-opacity-20 border-current flex flex-col justify-between hover:border-opacity-50 transition" style={{ backgroundColor: 'var(--card-color)' }}>
+                      <div>
+                        <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-4 bg-amber-500/10 text-amber-400">
+                          <Cpu className="w-6 h-6" />
+                        </div>
+                        <h3 className="text-xl font-bold mb-2">Technical Feasibility</h3>
+                        <p className="text-sm opacity-80 leading-relaxed mb-4">
+                          Leverages Google Gemini 3.1 Flash LLMs alongside Web Speech APIs and real-time audio PCM conversion, allowing ultra-low latency response times under 800ms.
+                        </p>
+                      </div>
+                      <ul className="text-xs opacity-70 space-y-1.5 border-t border-current/10 pt-4">
+                        <li className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-emerald-400" /> Direct browser audio PCM playback</li>
+                        <li className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-emerald-400" /> Virtual touch keyboard support</li>
+                      </ul>
+                    </div>
+
+                    <div className="p-6 rounded-2xl border border-opacity-20 border-current flex flex-col justify-between hover:border-opacity-50 transition" style={{ backgroundColor: 'var(--card-color)' }}>
+                      <div>
+                        <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-4 bg-emerald-500/10 text-emerald-400">
+                          <TrendingUp className="w-6 h-6" />
+                        </div>
+                        <h3 className="text-xl font-bold mb-2">Economic Viability</h3>
+                        <p className="text-sm opacity-80 leading-relaxed mb-4">
+                          Traditional human mock interview coaching costs $150-$300 per hour. VoxPrep offers infinite scalable, non-judgmental practice at near-zero marginal server cost.
+                        </p>
+                      </div>
+                      <ul className="text-xs opacity-70 space-y-1.5 border-t border-current/10 pt-4">
+                        <li className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-emerald-400" /> 95% cost reduction vs coaches</li>
+                        <li className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-emerald-400" /> Unlimited repeat attempts</li>
+                      </ul>
+                    </div>
+
+                    <div className="p-6 rounded-2xl border border-opacity-20 border-current flex flex-col justify-between hover:border-opacity-50 transition" style={{ backgroundColor: 'var(--card-color)' }}>
+                      <div>
+                        <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-4 bg-purple-500/10 text-purple-400">
+                          <ShieldCheck className="w-6 h-6" />
+                        </div>
+                        <h3 className="text-xl font-bold mb-2">Scalability & Privacy</h3>
+                        <p className="text-sm opacity-80 leading-relaxed mb-4">
+                          All sessions run client-side with zero audio recordings saved to external permanent databases, ensuring complete candidate privacy compliance.
+                        </p>
+                      </div>
+                      <ul className="text-xs opacity-70 space-y-1.5 border-t border-current/10 pt-4">
+                        <li className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-emerald-400" /> Private client session context</li>
+                        <li className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-emerald-400" /> Instant transcript generation</li>
+                      </ul>
+                    </div>
+                  </div>
+                </section>
+
+                <section className="py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-opacity-10 border-current">
+                  <div className="text-center mb-12">
+                    <h2 className="text-3xl font-extrabold tracking-tight mb-3">Multi-Segment Benefits</h2>
+                    <p className="text-sm opacity-75 max-w-xl mx-auto">Tailored solutions for students, seasoned professionals, enterprise hiring managers, and university career hubs.</p>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div className="p-5 rounded-2xl border border-opacity-20 border-current space-y-3" style={{ backgroundColor: 'var(--card-color)' }}>
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 rounded-lg bg-blue-500/20 text-blue-400">
+                          <GraduationCap className="w-5 h-5" />
+                        </div>
+                        <h4 className="font-bold text-base">Students & Freshers</h4>
+                      </div>
+                      <p className="text-xs opacity-80 leading-relaxed">Overcome first-time interview anxiety. Practice foundational STAR-method responses, technical concepts, and spoken English articulation.</p>
+                    </div>
+
+                    <div className="p-5 rounded-2xl border border-opacity-20 border-current space-y-3" style={{ backgroundColor: 'var(--card-color)' }}>
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 rounded-lg bg-teal-500/20 text-teal-400">
+                          <Briefcase className="w-5 h-5" />
+                        </div>
+                        <h4 className="font-bold text-base">Mid-Senior Roles</h4>
+                      </div>
+                      <p className="text-xs opacity-80 leading-relaxed">Simulate high-level system design, executive leadership scenarios, salary negotiation pitches, and complex situational case studies.</p>
+                    </div>
+
+                    <div className="p-5 rounded-2xl border border-opacity-20 border-current space-y-3" style={{ backgroundColor: 'var(--card-color)' }}>
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 rounded-lg bg-indigo-500/20 text-indigo-400">
+                          <Building2 className="w-5 h-5" />
+                        </div>
+                        <h4 className="font-bold text-base">Hiring Authorities</h4>
+                      </div>
+                      <p className="text-xs opacity-80 leading-relaxed">Standardize pre-screening benchmarks, generate objective candidate rubrics, and reduce interviewing workloads by up to 60%.</p>
+                    </div>
+
+                    <div className="p-5 rounded-2xl border border-opacity-20 border-current space-y-3" style={{ backgroundColor: 'var(--card-color)' }}>
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 rounded-lg bg-pink-500/20 text-pink-400">
+                          <UsersRound className="w-5 h-5" />
+                        </div>
+                        <h4 className="font-bold text-base">Inclusive Practice</h4>
+                      </div>
+                      <p className="text-xs opacity-80 leading-relaxed">Includes on-screen virtual keyboard and optional text-only toggles, accommodating different learning speeds, speech needs, and neurodiverse users.</p>
+                    </div>
+                  </div>
+                </section>
+              </div>
+            )}
+
+            {}
+            {page === 'interview' && (
+              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 transition-all duration-500">
+                {/* Candidate Session Banner */}
+                <div className="p-4 rounded-2xl mb-6 flex flex-wrap items-center justify-between gap-4 shadow-md border border-opacity-20 border-current" style={{ backgroundColor: 'var(--card-color)' }}>
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-xl flex items-center justify-center text-xl font-black shadow" style={{ backgroundColor: 'var(--accent-color)', color: 'var(--bg-color)' }}>
+                      {candidate.name ? candidate.name.charAt(0).toUpperCase() : 'C'}
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-bold text-lg">{candidate.name || 'Candidate'}</h3>
+                        <span className="text-xs px-2 py-0.5 rounded-full border border-current opacity-80 font-mono">{candidate.exp}</span>
+                      </div>
+                      <p className="text-xs opacity-75">
+                        Targeting: <span className="font-semibold text-amber-600 dark:text-amber-400">{candidate.role}</span> at <span className="font-semibold">{candidate.company || 'Target Company'}</span>
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Action Toolbar */}
+                  <div className="flex items-center gap-3 flex-wrap">
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 text-xs font-mono font-medium">
+                      <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+                      <span>AI Session Active</span>
+                    </div>
+
+                    <button
+                      onClick={toggleVoiceOutput}
+                      className="px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-2 hover:opacity-80 transition border border-opacity-20 border-current"
+                      style={{ backgroundColor: 'var(--bg-color)' }}
+                    >
+                      {isVoiceOutputEnabled ? <Volume2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" /> : <VolumeX className="w-4 h-4 text-rose-500" />}
+                      <span>Voice Output: {isVoiceOutputEnabled ? 'ON' : 'OFF'}</span>
+                    </button>
+
+                    <button
+                      onClick={() => setShowVirtualKeyboard(!showVirtualKeyboard)}
+                      className="px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-2 hover:opacity-80 transition border border-opacity-20 border-current"
+                      style={{ backgroundColor: 'var(--bg-color)' }}
+                    >
+                      <Keyboard className="w-4 h-4" style={{ color: 'var(--accent-color)' }} />
+                      <span>Virtual Keyboard</span>
+                    </button>
+
+                    <button
+                      onClick={() => setShowReportModal(true)}
+                      className="px-3.5 py-1.5 rounded-xl text-xs font-bold hover:opacity-90 transition flex items-center gap-1.5 shadow-md border"
+                      style={
+                        isDark
+                          ? { backgroundColor: 'rgba(245, 158, 11, 0.2)', color: '#FCD34D', borderColor: 'rgba(245, 158, 11, 0.4)' }
+                          : { backgroundColor: '#D97706', color: '#FFFFFF', borderColor: '#B45309' }
+                      }
+                    >
+                      <Award className="w-4 h-4" />
+                      <span>Get Score Card</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Chat Layout Grid */}
+                <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                  {/* Chat Window (Cols 1-3) */}
+                  <div className="lg:col-span-3 flex flex-col h-[600px] sm:h-[650px] rounded-2xl overflow-hidden shadow-xl border border-opacity-20 border-current" style={{ backgroundColor: 'var(--card-color)' }}>
+                    {/* Console Header */}
+                    <div className="p-3.5 border-b border-opacity-10 border-current flex items-center justify-between bg-black/10">
+                      <div className="flex items-center gap-2">
+                        <BotMessageSquare className="w-5 h-5" style={{ color: 'var(--accent-color)' }} />
+                        <span className="font-bold text-sm">Interviewer AI Console</span>
+                      </div>
+                      <div className="text-xs opacity-75 font-mono">
+                        Question <span>{questionCount}</span> of <span>{targetTotalQuestions}</span>
+                      </div>
+                    </div>
+
+                    {/* Messages Scroll Area */}
+                    <div className="flex-grow p-4 sm:p-6 overflow-y-auto space-y-4">
+                      {chatMessages.map(msg => {
+                        const isInterviewer = msg.sender === 'interviewer';
+                        return (
+                          <div key={msg.id} className={`flex gap-3 max-w-[85%] ${!isInterviewer ? 'ml-auto flex-row-reverse' : ''}`}>
+                            <div
+                              className="w-8 h-8 rounded-xl flex items-center justify-center font-bold text-xs shrink-0"
+                              style={
+                                isInterviewer
+                                  ? { backgroundColor: 'var(--accent-color)', color: 'var(--bg-color)' }
+                                  : { backgroundColor: 'rgba(245, 158, 11, 0.2)', color: '#fcd34d', border: '1px solid rgba(245, 158, 11, 0.3)' }
+                              }
+                            >
+                              {isInterviewer ? 'AI' : candidate.name ? candidate.name.charAt(0).toUpperCase() : 'C'}
+                            </div>
+                            <div
+                              className={`p-3.5 rounded-2xl text-xs sm:text-sm leading-relaxed space-y-1 shadow-sm border border-opacity-10 border-current`}
+                              style={isInterviewer ? { backgroundColor: 'var(--bg-color)' } : { backgroundColor: 'rgba(245, 158, 11, 0.2)' }}
+                            >
+                              <div className="flex items-center justify-between gap-4 border-b border-opacity-10 border-current pb-1 mb-1 opacity-70 text-[10px] font-mono">
+                                <span>{isInterviewer ? 'VoxPrep Interviewer' : candidate.name}</span>
+                                <div className="flex items-center gap-2">
+                                  {isInterviewer && !msg.isLoading && (
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        ensureAudioContextUnlocked();
+                                        speakText(msg.text);
+                                      }}
+                                      className="flex items-center gap-1 hover:text-amber-400 font-bold transition px-1 py-0.5 rounded bg-black/10"
+                                      title="Replay Voice Speech"
+                                    >
+                                      <Volume2 className="w-3 h-3" />
+                                      <span>Listen</span>
+                                    </button>
+                                  )}
+                                  <span>{msg.time}</span>
+                                </div>
+                              </div>
+                              <div className={msg.isLoading ? 'animate-pulse flex items-center gap-2' : ''}>
+                                {msg.isLoading && <Loader2 className="w-4 h-4 animate-spin" />}
+                                <span>{msg.text}</span>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                      <div ref={chatMessagesEndRef} />
+                    </div>
+
+                    {/* Audio Status & Error Bar */}
+                    {voiceError && (
+                      <div className="px-4 py-2 border-t border-opacity-10 border-current bg-rose-500/10 text-xs flex items-center justify-between text-rose-400 font-medium">
+                        <span>{voiceError}</span>
+                        <button type="button" onClick={() => setVoiceError('')} className="font-bold px-1 hover:text-white">✕</button>
+                      </div>
+                    )}
+
+                    {isListening && (
+                      <div className="px-4 py-2 border-t border-opacity-10 border-current bg-amber-500/10 text-xs flex items-center justify-between">
+                        <div className="flex items-center gap-2 text-amber-700 dark:text-amber-400 font-mono font-medium">
+                          <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+                          <span>Listening to speech... Speak clearly into your microphone</span>
+                        </div>
+                        <div className="flex items-center gap-1 h-3">
+                          <span className="w-1 h-full bg-amber-500/80 rounded animate-bounce"></span>
+                          <span className="w-1 h-2/3 bg-amber-500/80 rounded animate-bounce"></span>
+                          <span className="w-1 h-4/5 bg-amber-500/80 rounded animate-bounce"></span>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Input Controls */}
+                    <div className="p-3 sm:p-4 border-t border-opacity-10 border-current bg-black/10">
+                      <form onSubmit={handleSendAnswer} className="flex items-end gap-2">
+                        <div className="relative flex-grow">
+                          <textarea
+                            ref={textareaRef}
+                            rows={2}
+                            value={inputValue}
+                            onChange={(e) => setInputValue(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' && !e.shiftKey) {
+                                e.preventDefault();
+                                handleSendAnswer(e);
+                              }
+                            }}
+                            placeholder="Type your answer here or click the microphone to speak..."
+                            className="w-full p-3 pr-10 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 resize-none transition border border-opacity-20 border-current"
+                            style={{ backgroundColor: 'var(--input-bg)', color: 'var(--text-color)' }}
+                          />
+                          <span className="absolute bottom-2 right-2 text-[10px] opacity-40 font-mono hidden sm:inline">Shift + Enter for new line</span>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={toggleVoiceInput}
+                          className={`p-3.5 rounded-xl border border-opacity-20 border-current hover:border-amber-400 transition flex items-center justify-center ${
+                            isListening ? 'bg-rose-500/20 border-rose-500' : ''
+                          }`}
+                          style={{ backgroundColor: 'var(--card-color)' }}
+                          title="Toggle Voice Dictation"
+                        >
+                          <Mic className={`w-5 h-5 ${isListening ? 'text-rose-500 animate-pulse' : 'text-amber-600 dark:text-amber-400'}`} />
+                        </button>
+
+                        <button
+                          type="submit"
+                          className="p-3.5 rounded-xl shadow-md transition flex items-center justify-center hover:opacity-90"
+                          style={{ backgroundColor: 'var(--accent-color)', color: 'var(--bg-color)' }}
+                        >
+                          <Send className="w-5 h-5" />
+                        </button>
+                      </form>
+                    </div>
+                  </div>
+
+                  {/* Sidebar Column */}
+                  <div className="space-y-4">
+                    {}
+                    {showVirtualKeyboard && (
+                      <div className="p-4 rounded-2xl border border-opacity-20 border-current shadow-xl transition-all" style={{ backgroundColor: 'var(--card-color)' }}>
+                        <div className="flex justify-between items-center mb-3 pb-2 border-b border-opacity-10 border-current">
+                          <span className="text-xs font-bold flex items-center gap-1.5">
+                            <Keyboard className="w-4 h-4" style={{ color: 'var(--accent-color)' }} />
+                            Virtual Keyboard
+                          </span>
+                          <button type="button" onClick={() => setShowVirtualKeyboard(false)} className="text-xs hover:text-rose-400 font-bold px-1.5 py-0.5 rounded">✕</button>
+                        </div>
+
+                        <div className="space-y-1 font-mono text-xs">
+                          <div className="flex justify-center gap-0.5 sm:gap-1">
+                            {['1','2','3','4','5','6','7','8','9','0'].map(k => (
+                              <button key={k} type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => handleVkPress(k)} className="flex-1 py-1.5 rounded font-bold text-[11px] text-center border border-current/20 hover:bg-black/20">{k}</button>
+                            ))}
+                            <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => handleVkPress('Backspace')} className="px-2 py-1.5 rounded bg-rose-500/20 text-rose-300 font-bold text-[10px] text-center shrink-0">⌫</button>
+                          </div>
+
+                          <div className="flex justify-center gap-0.5 sm:gap-1">
+                            {['q','w','e','r','t','y','u','i','o','p'].map(k => (
+                              <button key={k} type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => handleVkPress(k)} className="flex-1 py-1.5 rounded uppercase text-[11px] text-center border border-current/20 hover:bg-black/20">{k}</button>
+                            ))}
+                          </div>
+
+                          <div className="flex justify-center gap-0.5 sm:gap-1 px-1">
+                            {['a','s','d','f','g','h','j','k','l'].map(k => (
+                              <button key={k} type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => handleVkPress(k)} className="flex-1 py-1.5 rounded uppercase text-[11px] text-center border border-current/20 hover:bg-black/20">{k}</button>
+                            ))}
+                          </div>
+
+                          <div className="flex justify-center gap-0.5 sm:gap-1 px-2">
+                            {['z','x','c','v','b','n','m',',','.'].map(k => (
+                              <button key={k} type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => handleVkPress(k)} className="flex-1 py-1.5 rounded uppercase text-[11px] text-center border border-current/20 hover:bg-black/20">{k}</button>
+                            ))}
+                          </div>
+
+                          <div className="flex justify-center gap-1 pt-1">
+                            <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => handleVkPress(' ')} className="py-1.5 flex-grow rounded font-bold text-xs text-center border border-current/20 hover:bg-black/20">SPACE</button>
+                            <button type="button" onClick={handleSendAnswer} className="py-1.5 px-3 rounded font-bold text-xs text-center shrink-0" style={{ backgroundColor: 'var(--accent-color)', color: 'var(--bg-color)' }}>Enter ↵</button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="p-5 rounded-2xl border border-opacity-20 border-current text-xs space-y-3 opacity-90" style={{ backgroundColor: 'var(--card-color)' }}>
+                      <div className="font-bold flex items-center gap-2 text-sm border-b border-opacity-10 border-current pb-2">
+                        <Command className="w-4 h-4" style={{ color: 'var(--accent-color)' }} />
+                        <span>Quick Actions & Guide</span>
+                      </div>
+                      <div className="space-y-2.5 text-xs opacity-80 leading-relaxed">
+                        <p className="flex items-start gap-2">
+                          <Mic className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
+                          <span>Click <strong>Microphone</strong> to record your answer with real-time speech dictation.</span>
+                        </p>
+                        <p className="flex items-start gap-2">
+                          <Keyboard className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
+                          <span>Click <strong>Virtual Keyboard</strong> to toggle the interactive on-screen touch typing layout.</span>
+                        </p>
+                        <p className="flex items-start gap-2">
+                          <Award className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
+                          <span>Click <strong>Get Score Card</strong> anytime to complete your interview and review your performance report.</span>
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </main>
+
+          {}
+          {showRegistrationModal && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm transition-all duration-300">
+              <div className="w-full max-w-lg rounded-3xl p-6 sm:p-8 shadow-2xl relative border border-opacity-20 border-current max-h-[90vh] overflow-y-auto" style={{ backgroundColor: 'var(--card-color)' }}>
+                <button onClick={() => setShowRegistrationModal(false)} className="absolute top-5 right-5 p-2 rounded-full hover:bg-black/20 text-sm font-bold opacity-75">✕</button>
+
+                <div className="text-center mb-6">
+                  <div className="w-12 h-12 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow" style={{ backgroundColor: 'var(--accent-color)', color: 'var(--bg-color)' }}>
+                    <UserCheck className="w-6 h-6" />
+                  </div>
+                  <h3 className="text-2xl font-extrabold tracking-tight">Candidate Profile & API Setup</h3>
+                  <p className="text-xs opacity-75 mt-1">Configure VoxPrep AI to tailor role-specific interview questions.</p>
+                </div>
+
+                <form onSubmit={handleStartInterviewSubmit} className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider mb-1.5 opacity-90">Candidate Full Name *</label>
+                    <input
+                      type="text"
+                      required
+                      value={candidate.name}
+                      onChange={(e) => setCandidate({ ...candidate, name: e.target.value })}
+                      placeholder="e.g. Alex Morgan"
+                      className="w-full p-3 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 border border-opacity-20 border-current"
+                      style={{ backgroundColor: 'var(--input-bg)', color: 'var(--text-color)' }}
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider mb-1.5 opacity-90">Target Role *</label>
+                      <input
+                        type="text"
+                        required
+                        value={candidate.role}
+                        onChange={(e) => setCandidate({ ...candidate, role: e.target.value })}
+                        placeholder="e.g. Senior Frontend Dev"
+                        className="w-full p-3 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 border border-opacity-20 border-current"
+                        style={{ backgroundColor: 'var(--input-bg)', color: 'var(--text-color)' }}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider mb-1.5 opacity-90">Targeted Company</label>
+                      <input
+                        type="text"
+                        value={candidate.company}
+                        onChange={(e) => setCandidate({ ...candidate, company: e.target.value })}
+                        placeholder="e.g. Google / Startup"
+                        className="w-full p-3 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 border border-opacity-20 border-current"
+                        style={{ backgroundColor: 'var(--input-bg)', color: 'var(--text-color)' }}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider mb-1.5 opacity-90">Experience Level</label>
+                      <select
+                        value={candidate.exp}
+                        onChange={(e) => setCandidate({ ...candidate, exp: e.target.value })}
+                        className="w-full p-3 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 border border-opacity-20 border-current"
+                        style={{ backgroundColor: 'var(--input-bg)', color: 'var(--text-color)' }}
+                      >
+                        <option value="Entry / New Grad">Entry / New Grad (0-2 yrs)</option>
+                        <option value="Mid-Level">Mid-Level (2-5 yrs)</option>
+                        <option value="Senior / Lead">Senior / Lead (5+ yrs)</option>
+                        <option value="Executive / Manager">Executive / Manager</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider mb-1.5 opacity-90">Interview Focus</label>
+                      <select
+                        value={candidate.type}
+                        onChange={(e) => setCandidate({ ...candidate, type: e.target.value })}
+                        className="w-full p-3 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 border border-opacity-20 border-current"
+                        style={{ backgroundColor: 'var(--input-bg)', color: 'var(--text-color)' }}
+                      >
+                        <option value="Technical & Coding">Technical Concepts & Coding</option>
+                        <option value="Behavioral & STAR">Behavioral & Situational (STAR)</option>
+                        <option value="Mixed Assessment">Comprehensive Mixed Round</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* Connected API Keys Section */}
+                  <div className="pt-2 border-t border-opacity-10 border-current space-y-3">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-bold uppercase tracking-wider opacity-90">Mistral AI Key (LLM Engine)</label>
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 font-mono font-bold">Active Connected</span>
+                    </div>
+                    <input
+                      type="password"
+                      value={mistralApiKey}
+                      onChange={(e) => setMistralApiKey(e.target.value)}
+                      placeholder="Mistral API Key"
+                      className="w-full p-2.5 rounded-xl text-xs font-mono focus:outline-none focus:ring-2 focus:ring-amber-400 border border-opacity-20 border-current"
+                      style={{ backgroundColor: 'var(--input-bg)', color: 'var(--text-color)' }}
+                    />
+
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-bold uppercase tracking-wider opacity-90">Rime AI Key (Voice TTS Engine)</label>
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 font-mono font-bold">Active Connected</span>
+                    </div>
+                    <input
+                      type="password"
+                      value={rimeApiKey}
+                      onChange={(e) => setRimeApiKey(e.target.value)}
+                      placeholder="Rime API Key"
+                      className="w-full p-2.5 rounded-xl text-xs font-mono focus:outline-none focus:ring-2 focus:ring-amber-400 border border-opacity-20 border-current"
+                      style={{ backgroundColor: 'var(--input-bg)', color: 'var(--text-color)' }}
+                    />
+                  </div>
+
+                  <div className="pt-2">
+                    <button
+                      type="submit"
+                      className="w-full py-4 rounded-xl font-bold text-base shadow-lg hover:scale-[1.02] transition flex items-center justify-center gap-2"
+                      style={{ backgroundColor: 'var(--accent-color)', color: 'var(--bg-color)' }}
+                    >
+                      <PlayCircle className="w-5 h-5" />
+                      <span>Launch VoxPrep AI Session</span>
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
+
+          {}
+          {showReportModal && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md transition-all">
+              <div className="w-full max-w-2xl rounded-3xl p-6 sm:p-8 shadow-2xl relative border border-opacity-20 border-current max-h-[90vh] overflow-y-auto" style={{ backgroundColor: 'var(--card-color)' }}>
+                <button onClick={() => setShowReportModal(false)} className="absolute top-5 right-5 p-2 rounded-full hover:bg-black/20 font-bold">✕</button>
+
+                <div className="text-center mb-6">
+                  <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3 text-2xl font-black shadow-lg" style={{ backgroundColor: 'var(--accent-color)', color: 'var(--bg-color)' }}>
+                    🏆
+                  </div>
+                  <h3 className="text-2xl font-extrabold">VoxPrep Performance Report</h3>
+                  <p className="text-xs opacity-75 mt-1">{candidate.name} — {candidate.role} ({candidate.exp})</p>
+                </div>
+
+                <div className="grid grid-cols-3 gap-4 mb-6 text-center">
+                  <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+                    <div className="text-2xl font-black text-emerald-400">{reportData.avgTech}/10</div>
+                    <div className="text-[11px] opacity-75 uppercase font-bold">Technical</div>
+                  </div>
+                  <div className="p-3 rounded-xl bg-blue-500/10 border border-blue-500/20">
+                    <div className="text-2xl font-black text-blue-400">{reportData.avgClarity}/10</div>
+                    <div className="text-[11px] opacity-75 uppercase font-bold">Clarity</div>
+                  </div>
+                  <div className="p-3 rounded-xl bg-purple-500/10 border border-purple-500/20">
+                    <div className="text-2xl font-black text-purple-400">{reportData.avgRel}/10</div>
+                    <div className="text-[11px] opacity-75 uppercase font-bold">Relevance</div>
+                  </div>
+                </div>
+
+                <div className="space-y-4 text-xs">
+                  <div className="p-4 rounded-xl bg-black/20 space-y-1">
+                    <h5 className="font-bold text-amber-400 flex items-center gap-1.5">
+                      <ThumbsUp className="w-4 h-4" /> Key Strengths Observed
+                    </h5>
+                    <p className="opacity-80 leading-relaxed">
+                      {reportData.strengths.length > 0 ? reportData.strengths.join(' ') : 'Demonstrated strong technical vocabulary and structured situational examples effectively.'}
+                    </p>
+                  </div>
+
+                  <div className="p-4 rounded-xl bg-black/20 space-y-1">
+                    <h5 className="font-bold text-rose-400 flex items-center gap-1.5">
+                      <TrendingUp className="w-4 h-4" /> Areas for Enhancement
+                    </h5>
+                    <p className="opacity-80 leading-relaxed">
+                      {reportData.improvements.length > 0 ? reportData.improvements.join(' ') : 'Incorporate more specific metric outcomes (e.g., latency reduction percentages, user conversion impact).'}
+                    </p>
+                  </div>
+
+                  <div className="p-4 rounded-xl bg-black/20 space-y-2">
+                    <h5 className="font-bold flex items-center gap-1.5">
+                      <FileText className="w-4 h-4" /> Interview Session Transcript Summary
+                    </h5>
+                    <div className="font-mono text-[11px] opacity-75 space-y-2 max-h-40 overflow-y-auto p-2 bg-black/30 rounded-lg">
+                      {chatMessages.map(m => (
+                        <p key={m.id}>
+                          <strong>{m.sender === 'candidate' ? candidate.name : 'VoxPrep AI'}:</strong> {m.text}
+                        </p>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-6 flex flex-col sm:flex-row gap-3">
+                  <button onClick={downloadTranscript} className="flex-grow py-3 rounded-xl border border-current/30 font-bold hover:bg-black/10 transition flex items-center justify-center gap-2 text-xs">
+                    <Download className="w-4 h-4" />
+                    <span>Export Full Transcript (TXT)</span>
+                  </button>
+                  <button onClick={handleLogout} className="flex-grow py-3 rounded-xl font-bold shadow-md hover:scale-[1.02] transition flex items-center justify-center gap-2 text-xs" style={{ backgroundColor: 'var(--accent-color)', color: 'var(--bg-color)' }}>
+                    <RotateCcw className="w-4 h-4" />
+                    <span>Start New Interview</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {}
+          <footer className="mt-20 border-t border-opacity-10 border-current bg-black/10 py-12 px-4 sm:px-6 lg:px-8 text-xs">
+            <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <MicVocal className="w-5 h-5" style={{ color: 'var(--accent-color)' }} />
+                  <span className="text-xl font-bold">VoxPrep</span>
+                </div>
+                <p className="opacity-75 leading-relaxed">
+                  Empowering job candidates worldwide with real-time AI voice simulations, instant rubric evaluations, and accessible touch tools.
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <h5 className="font-bold text-sm mb-3">Candidate Support & Helpline</h5>
+                <p className="opacity-80 flex items-center gap-2">
+                  <Phone className="w-3.5 h-3.5" style={{ color: 'var(--accent-color)' }} />
+                  <span>Helpdesk: +1 (800) 555-VOXPREP</span>
+                </p>
+                <p className="opacity-80 flex items-center gap-2">
+                  <Mail className="w-3.5 h-3.5" style={{ color: 'var(--accent-color)' }} />
+                  <span>Support: help@voxprep.ai</span>
+                </p>
+                <p className="opacity-80 flex items-center gap-2">
+                  <Clock className="w-3.5 h-3.5" style={{ color: 'var(--accent-color)' }} />
+                  <span>24/7 AI Assistance Active</span>
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <h5 className="font-bold text-sm mb-3">Resources</h5>
+                <p><a href="#feasibilitySection" className="opacity-80 hover:underline">Feasibility Study</a></p>
+                <p><button onClick={() => setShowRegistrationModal(true)} className="opacity-80 hover:underline">Interview Setup</button></p>
+                <p><button onClick={() => alert('VoxPrep privacy: Client-side ephemeral session processing. No stored voice recordings.')} className="opacity-80 hover:underline">Privacy & Safety Policy</button></p>
+              </div>
+
+              <div className="space-y-2">
+                <h5 className="font-bold text-sm mb-3">For Universities & Enterprise</h5>
+                <p className="opacity-75 leading-relaxed">
+                  Deploy customized AI interview rubrics across university career portals or HR talent screening workflows.
+                </p>
+                <button onClick={() => alert('Enterprise contact requested! Email enterprise@voxprep.ai for API key quotas.')} className="mt-2 px-3 py-1.5 rounded-lg border border-current/20 font-semibold hover:bg-black/10 transition">
+                  Request Campus License
+                </button>
+              </div>
+            </div>
+
+            <div className="max-w-7xl mx-auto pt-6 border-t border-opacity-10 border-current flex flex-col sm:flex-row justify-between items-center gap-4 opacity-70 text-[11px]">
+              <p>© 2026 VoxPrep AI Simulator. All rights reserved.</p>
+              <div className="flex items-center gap-4">
+                <span>Terms of Service</span>
+                <span>•</span>
+                <span>Security</span>
+                <span>•</span>
+                <span>Accessibility Mode</span>
+              </div>
+            </div>
+          </footer>
+        </div>
+      );
+    }
+
+    const container = document.getElementById('root');
+    const root = ReactDOM.createRoot(container);
+    root.render(<App />);
+  </script>
+</body>
+</html>
